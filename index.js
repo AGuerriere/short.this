@@ -31,7 +31,7 @@ app.use(express.static('./public'));
 const schema = yup.object().shape({
     slug: yup.string().trim().matches(/[\w\-]/i),
     url: yup.string().trim().url().required(),
-})
+  });
 
 app.post('/url', async (req, res, next) => {
     let { slug, url } = req.body;
@@ -42,23 +42,17 @@ app.post('/url', async (req, res, next) => {
         });
         if (!slug) {
             slug = nanoid(5);
-        } else {
-            const existing = await urls.findOne({ slug });
-            if (existing) {
-                throw new Error('Slug in use. 🍔')
-            }
         }
         slug = slug.toLowerCase();
-        const newUrl = {
-            url,
+        res.json({
             slug,
-        };
-        const created = await urls.insert(newUrl);
-        res.json(created);
+            url,
+        });
     } catch (error) {
         next(error);
     }
 })
+
 
 app.use((error, req, res, next) => {
     if (error.status) {
